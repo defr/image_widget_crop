@@ -259,7 +259,7 @@ class ImageCropWidget extends ImageWidget {
    *
    * @param string $uri
    *   The uri of uploaded image.
-   * @param array $original_crop_properties
+   * @param array $original_crop
    *   All properties returned by the crop plugin (js),
    *   and the size of thumbnail image.
    * @param string $preview
@@ -270,13 +270,17 @@ class ImageCropWidget extends ImageWidget {
    *   thumbnail height, thumbnail width), to apply the real crop
    *   into thumbnail preview.
    */
-  public static function getThumbnailCropProperties($uri, array $original_crop_properties, $preview = 'crop_thumbnail') {
+  public static function getThumbnailCropProperties($uri, array $original_crop, $preview = 'crop_thumbnail') {
+    $crop_thumbnail = [];
+
     $image_styles = \Drupal::service('entity.manager')
       ->getStorage('image_style')
       ->loadByProperties(['status' => TRUE, 'name' => $preview]);
 
     // Verify the configuration of ImageStyle and get the data width.
-    $effect = $image_styles[$preview]->getEffects()->getConfiguration();
+    /** @var \Drupal\image\Entity\ImageStyle $image_style */
+    $image_style = $image_styles[$preview];
+    $effect = $image_style->getEffects()->getConfiguration();
 
     // Get the real sizes of uploaded image.
     list($width, $height) = getimagesize($uri);
@@ -299,22 +303,22 @@ class ImageCropWidget extends ImageWidget {
 
     // Get the Crop selection Size (into Uploaded image) &,
     // calculate selection for Thumbnail.
-    $crop_thumbnail_properties['crop-h'] = round($original_crop_properties['size']['height'] / $delta);
-    $crop_thumbnail_properties['crop-w'] = round($original_crop_properties['size']['width'] / $delta);
+    $crop_thumbnail['crop-h'] = round($original_crop['size']['height'] / $delta);
+    $crop_thumbnail['crop-w'] = round($original_crop['size']['width'] / $delta);
 
     // Calculate the Top-Left corner for Thumbnail.
-    $crop_thumbnail_properties['x1'] = round($original_crop_properties['anchor']['x'] / $delta);
-    $crop_thumbnail_properties['y1'] = round($original_crop_properties['anchor']['y'] / $delta);
+    $crop_thumbnail['x1'] = round($original_crop['anchor']['x'] / $delta);
+    $crop_thumbnail['y1'] = round($original_crop['anchor']['y'] / $delta);
 
     // Calculate the Bottom-right position for Thumbnail.
-    $crop_thumbnail_properties['x2'] = $crop_thumbnail_properties['x1'] + $crop_thumbnail_properties['crop-w'];
-    $crop_thumbnail_properties['y2'] = $crop_thumbnail_properties['y1'] + $crop_thumbnail_properties['crop-h'];
+    $crop_thumbnail['x2'] = $crop_thumbnail['x1'] + $crop_thumbnail['crop-w'];
+    $crop_thumbnail['y2'] = $crop_thumbnail['y1'] + $crop_thumbnail['crop-h'];
 
     // Get the real thumbnail sizes.
-    $crop_thumbnail_properties['thumb-w'] = $thumbnail_width;
-    $crop_thumbnail_properties['thumb-h'] = $thumbnail_height;
+    $crop_thumbnail['thumb-w'] = $thumbnail_width;
+    $crop_thumbnail['thumb-h'] = $thumbnail_height;
 
-    return $crop_thumbnail_properties;
+    return $crop_thumbnail;
   }
 
   /**
@@ -352,9 +356,12 @@ class ImageCropWidget extends ImageWidget {
    * {@inheritdoc}
    */
   public function settingsSummary() {
+    $preview = [];
+
     $image_styles = image_style_options(FALSE);
     // Unset possible 'No defined styles' option.
     unset($image_styles['']);
+
     // Styles could be lost because of enabled/disabled modules that defines
     // their styles in code.
     $image_style_setting = $this->getSetting('preview_image_style');
