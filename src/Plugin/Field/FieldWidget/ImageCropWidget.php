@@ -7,10 +7,10 @@
 
 namespace Drupal\image_widget_crop\Plugin\Field\FieldWidget;
 
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\image\Plugin\Field\FieldWidget\ImageWidget;
 use Drupal\image_widget_crop\ImageWidgetCrop;
-use Drupal\Core\Field\FieldItemListInterface;
 
 
 /**
