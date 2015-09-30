@@ -42,6 +42,9 @@ class ImageCropWidget extends ImageWidget {
    * Expands the image_image type to include the alt and title fields.
    *
    * This method is assigned as a #process callback in formElement() method.
+   *
+   * @return array
+   *   The elements with parents fields.
    */
   public static function process($element, FormStateInterface $form_state, $form) {
     $edit = FALSE;
@@ -365,16 +368,16 @@ class ImageCropWidget extends ImageWidget {
     // Styles could be lost because of enabled/disabled modules that defines
     // their styles in code.
     $image_style_setting = $this->getSetting('preview_image_style');
-    $crop_image_style_setting = $this->getSetting('crop_preview_image_style');
+    $crop_setting = $this->getSetting('crop_preview_image_style');
     $crop_list = $this->getSetting('crop_list');
 
     if (isset($crop_list) && !empty($crop_list)) {
       $preview[] = t('Crop image style search: @list', ['@list' => implode(", ", $crop_list)]);
     }
 
-    if (isset($image_styles[$image_style_setting]) || isset($image_styles[$crop_image_style_setting])) {
+    if (isset($image_styles[$image_style_setting]) || isset($image_styles[$crop_setting])) {
       $preview[] = t('Preview image style: @style', ['@style' => $image_styles[$image_style_setting]]);
-      $preview[] = t('Crop preview image style: @style', ['@style' => $image_styles[$crop_image_style_setting]]);
+      $preview[] = t('Crop preview image style: @style', ['@style' => $image_styles[$crop_setting]]);
     }
     else {
       $preview = t('Original image');
